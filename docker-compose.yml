@@ -1,0 +1,29 @@
+services:
+  app:
+    build: .
+    ports:
+      - "3210:3000"
+    environment:
+      DATABASE_URL: "file:/app/data/dev.db"
+      TYPESAFE_API_KEY: ${TYPESAFE_API_KEY}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4o-mini}
+      SEARXNG_URL: "http://searxng:8080"
+    volumes:
+      - app-data:/app/data
+    depends_on:
+      - searxng
+
+  searxng:
+    image: docker.io/searxng/searxng:latest
+    environment:
+      SEARXNG_SECRET: ${SEARXNG_SECRET}
+    volumes:
+      - ./searxng:/etc/searxng:ro
+      - searxng-data:/var/cache/searxng
+    ports:
+      - "8080:8080"
+
+volumes:
+  app-data:
+  searxng-data:

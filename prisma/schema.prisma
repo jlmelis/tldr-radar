@@ -1,0 +1,118 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Edition {
+  id      String  @id @default(cuid())
+  slug    String  @unique // tldr.tech slug, e.g. "tech", "webdev", "ai"
+  name    String // display name, e.g. "TLDR Tech"
+  enabled Boolean @default(true)
+
+  runs Run[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum RunStatus {
+  PENDING
+  COMPLETE
+  ERROR
+}
+
+model Run {
+  id        String    @id @default(cuid())
+  date      String // YYYY-MM-DD, the TLDR issue date (not the fetch date)
+  editionId String
+  edition   Edition   @relation(fields: [editionId], references: [id])
+  status    RunStatus @default(PENDING)
+  error     String? // populated when status = ERROR
+  fetchedAt DateTime?
+
+  articles Article[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([date, editionId])
+}
+
+model Article {
+  id              String @id @default(cuid())
+  runId           String
+  run             Run    @relation(fields: [runId], references: [id], onDelete: Cascade)
+  title           String
+  url             String
+  sourceDomain    String
+  category        String // the TLDR section heading, e.g. "Big Tech & Startups"
+  blurb           String
+  readTimeMinutes Int?
+  order           Int // position within the issue, for stable ordering
+
+  jevJudgment JevJudgment?
+  deepDive    DeepDive?
+
+  createdAt DateTime @default(now())
+
+  @@index([runId])
+}
+
+model JevJudgment {
+  id        String  @id @default(cuid())
+  articleId String  @unique
+  article   Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+
+  // Score: relevance to the stated interest profile.
+  relevanceScore      Float // 0-1, probability-weighted position across ordered levels
+  relevanceConfidence Float
+  relevanceLegend     String // JSON-encoded map of level -> description, for display
+
+  // Choice: what kind of update this article is.
+  articleType              String // winning option, e.g. "new_tool_or_framework"
+  articleTypeProbabilities String // JSON-encoded map of option -> probability
+
+  // Noul: does this look like something with real hands-on material to find.
+  // (Noul has no separate confidence — the probability alone describes it.)
+  actionableProbability Float // 0-1, near 1 = yes
+
+  rawResponse String // full JSON response from TypeSafe, for debugging/inspection
+
+  createdAt DateTime @default(now())
+}
+
+enum DeepDiveStatus {
+  PENDING
+  COMPLETE
+  ERROR
+}
+
+model DeepDive {
+  id        String         @id @default(cuid())
+  articleId String         @unique
+  article   Article        @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  status    DeepDiveStatus @default(PENDING)
+  summary   String?
+  resources String? // JSON-encoded array of {title, url, snippet}
+  model     String? // e.g. the OpenAI model id used
+  error     String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model InterestProfile {
+  id                  String @id @default("default")
+  description         String // free-text description of what you care about
+  relevanceThreshold  Float  @default(0.6) // 0-1, gates dashboard visibility
+  actionableThreshold Float  @default(0.6) // 0-1, gates the deep-dive search
+
+  updatedAt DateTime @updatedAt
+}

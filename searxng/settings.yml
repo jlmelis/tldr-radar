@@ -1,0 +1,15 @@
+use_default_settings: true
+
+general:
+  instance_name: "tldr-radar search"
+
+server:
+  secret_key: "${SEARXNG_SECRET}"
+  limiter: false
+  image_proxy: false
+
+search:
+  safe_search: 0
+  formats:
+    - html
+    - json

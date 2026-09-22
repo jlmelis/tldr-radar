@@ -5,8 +5,8 @@ import { db } from "@/lib/db";
 import { runPipeline } from "@/lib/pipeline";
 import { updateInterestProfile } from "@/lib/settings";
 
-export async function triggerRun(editionSlug: string, date: string) {
-  await runPipeline(editionSlug, date);
+export async function triggerRun(editionSlug: string, date: string, force = false) {
+  await runPipeline(editionSlug, date, { force });
   revalidatePath("/");
 }
 

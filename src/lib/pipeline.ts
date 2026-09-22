@@ -4,13 +4,18 @@ import { judgeArticle } from "./jev";
 import { runDeepDive } from "./deep-dive-agent";
 import { getInterestProfile } from "./settings";
 
-export async function runPipeline(editionSlug: string, date: string) {
+export async function runPipeline(
+  editionSlug: string,
+  date: string,
+  options?: { force?: boolean },
+) {
+  const force = options?.force ?? false;
   const edition = await db.edition.findUniqueOrThrow({ where: { slug: editionSlug } });
 
   const existing = await db.run.findUnique({
     where: { date_editionId: { date, editionId: edition.id } },
   });
-  if (existing?.status === "COMPLETE") {
+  if (existing?.status === "COMPLETE" && !force) {
     return existing; // cache hit, nothing to do
   }
 
@@ -21,10 +26,11 @@ export async function runPipeline(editionSlug: string, date: string) {
     }));
 
   if (existing) {
-    // Retrying a PENDING/ERROR run — clear any partial articles (and their
-    // cascaded judgments/deep-dives) from the previous attempt first, so we
-    // don't duplicate rows for articles already inserted before it failed.
+    // Retrying a PENDING/ERROR run, or forcing a re-run of a COMPLETE one —
+    // clear old articles (and their cascaded judgments/deep-dives) first, so
+    // we don't duplicate or mix stale rows with the fresh pipeline run.
     await db.article.deleteMany({ where: { runId: run.id } });
+    await db.run.update({ where: { id: run.id }, data: { status: "PENDING", error: null } });
   }
 
   try {

@@ -31,13 +31,15 @@ export function RunControls({
     router.push(`/?${next.toString()}`);
   }
 
+  const isCached = runStatus === "COMPLETE";
+
   function handleFetch() {
     startTransition(async () => {
-      await triggerRun(selectedEdition, selectedDate);
+      // Re-fetching a cached run is an explicit request to redo it — force
+      // past the cache instead of the normal cache-hit no-op.
+      await triggerRun(selectedEdition, selectedDate, isCached);
     });
   }
-
-  const isCached = runStatus === "COMPLETE";
 
   return (
     <div className="flex flex-col gap-4 rounded-xl border border-neutral-200 bg-neutral-50 p-4">

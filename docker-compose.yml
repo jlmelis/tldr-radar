@@ -3,11 +3,14 @@ services:
     build: .
     ports:
       - "3210:3000"
+    # Secrets are loaded straight from .env, not interpolated as ${VARS} below —
+    # interpolation prefers an already-set shell/session env var of the same
+    # name over .env, which silently shadows real secrets with empty values
+    # (this bit us via WSLENV passing through an empty OPENAI_API_KEY).
+    env_file:
+      - .env
     environment:
       DATABASE_URL: "file:/app/data/dev.db"
-      TYPESAFE_API_KEY: ${TYPESAFE_API_KEY}
-      OPENAI_API_KEY: ${OPENAI_API_KEY}
-      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4o-mini}
       SEARXNG_URL: "http://searxng:8080"
     volumes:
       - app-data:/app/data

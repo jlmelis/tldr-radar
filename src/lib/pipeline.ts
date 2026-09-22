@@ -95,7 +95,6 @@ export async function runPipeline(
             data: {
               articleId: article.id,
               status: "COMPLETE",
-              summary: deepDive.summary,
               resources: JSON.stringify(deepDive.resources),
               model: deepDive.model,
             },
@@ -144,7 +143,6 @@ export interface ArticleView {
   hasAdditionalResources: boolean;
   deepDive: {
     status: string;
-    summary: string | null;
     resources: { title: string; url: string; snippet: string }[];
     error: string | null;
   } | null;
@@ -195,7 +193,6 @@ export async function getRunView(editionSlug: string, date: string) {
         deepDive: a.deepDive
           ? {
               status: a.deepDive.status,
-              summary: a.deepDive.summary,
               resources: a.deepDive.resources ? JSON.parse(a.deepDive.resources) : [],
               error: a.deepDive.error,
             }

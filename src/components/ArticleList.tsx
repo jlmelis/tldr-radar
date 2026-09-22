@@ -45,15 +45,17 @@ function ArticleDetail({ article }: { article: ArticleView }) {
       </div>
 
       {article.deepDive && (
-        <div className="rounded border border-neutral-200 p-3 flex flex-col gap-2">
+        <div className="rounded border border-neutral-200 p-3 flex flex-col gap-1.5">
           <div className="text-xs font-medium text-neutral-500 uppercase tracking-wide">
-            Deep dive {article.deepDive.status === "ERROR" && "(failed)"}
+            Resources
           </div>
-          {article.deepDive.summary && (
-            <p className="text-neutral-700">{article.deepDive.summary}</p>
-          )}
           {article.deepDive.error && (
             <p className="text-red-600 text-xs">{article.deepDive.error}</p>
+          )}
+          {article.deepDive.status === "COMPLETE" && article.deepDive.resources.length === 0 && (
+            <p className="text-neutral-500 text-xs">
+              No tutorial-shaped resources found for this one.
+            </p>
           )}
           {article.deepDive.resources.length > 0 && (
             <ul className="flex flex-col gap-1">
@@ -67,9 +69,6 @@ function ArticleDetail({ article }: { article: ArticleView }) {
                   >
                     {r.title}
                   </a>
-                  {r.snippet && (
-                    <span className="text-neutral-500"> — {r.snippet.slice(0, 100)}</span>
-                  )}
                 </li>
               ))}
             </ul>

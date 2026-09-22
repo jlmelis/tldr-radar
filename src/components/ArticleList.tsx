@@ -84,8 +84,16 @@ function ArticleRow({ article }: { article: ArticleView }) {
 
   return (
     <li className="border border-neutral-200 rounded-lg p-4 hover:border-neutral-300 transition-colors">
-      <button
+      <div
+        role="button"
+        tabIndex={0}
         onClick={() => setOpen((v) => !v)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            setOpen((v) => !v);
+          }
+        }}
         className="w-full text-left flex flex-col gap-1.5 cursor-pointer"
       >
         <div className="flex items-start justify-between gap-3">
@@ -102,6 +110,15 @@ function ArticleRow({ article }: { article: ArticleView }) {
             {article.readTimeMinutes ? `${article.readTimeMinutes} min` : ""}
           </span>
         </div>
+        <a
+          href={article.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={(e) => e.stopPropagation()}
+          className="ml-4 text-xs text-blue-600 hover:underline w-fit cursor-pointer"
+        >
+          Read original article ↗
+        </a>
         <div className="flex flex-wrap items-center gap-2 text-xs text-neutral-500 ml-4">
           <span>{article.sourceDomain}</span>
           <span>·</span>
@@ -120,7 +137,7 @@ function ArticleRow({ article }: { article: ArticleView }) {
             </span>
           )}
         </div>
-      </button>
+      </div>
       {open && <ArticleDetail article={article} />}
     </li>
   );

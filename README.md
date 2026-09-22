@@ -78,8 +78,10 @@ from `docker compose up searxng`) for the deep-dive agent to work.
   published issue (weekends/holidays) instead of erroring.
 - `src/lib/jev.ts` — the TypeSafe/Jev integration; one `systemOne` call per
   article with the three questions above.
-- `src/lib/deep-dive-agent.ts` — the Vercel AI SDK tool-calling agent that
-  searches SearXNG and writes a short synthesis.
+- `src/lib/deep-dive-agent.ts` — the Vercel AI SDK tool-calling agent that runs
+  a few targeted SearXNG queries (docs, tutorial, repo) per article, then a
+  second call curates which results are genuinely hands-on material worth
+  showing, discarding news coverage of the same announcement.
 - `src/lib/pipeline.ts` — orchestrates scrape → judge → gate → deep-dive →
   cache for a given (edition, date), and reads back a run's results with the
   gates re-derived from the current thresholds (so changing a threshold in

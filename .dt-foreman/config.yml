@@ -1,0 +1,6 @@
+artifacts:
+  save: false          # set true to have feature-factory write story/brief/etc. to disk
+  dir: .dt-foreman/artifacts   # where persisted stage output goes, if save: true
+  scope: gated          # gated: story+brief only | all: every stage | final: one summary at the end
+tests:
+  full_suite: after-implementation   # after-implementation: run whole suite once, before acceptance tests | off: rely on external CI

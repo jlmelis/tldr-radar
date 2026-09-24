@@ -1,6 +1,7 @@
 services:
   app:
     build: .
+    restart: unless-stopped
     ports:
       - "3210:3000"
     # Secrets are loaded straight from .env, not interpolated as ${VARS} below —
@@ -19,6 +20,7 @@ services:
 
   searxng:
     image: docker.io/searxng/searxng:latest
+    restart: unless-stopped
     environment:
       SEARXNG_SECRET: ${SEARXNG_SECRET}
     volumes:
